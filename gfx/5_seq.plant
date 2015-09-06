@@ -1,0 +1,35 @@
+@startuml
+"Consumer: IS" -> "Security Server Pair": request_svc(msg)
+"Security Server Pair" -> Adapter:request_svc(msg)
+Adapter -> Adapter:validate(svc, msg)
+Adapter -> Adapter:req = \ntransform(svc, msg)
+Adapter -> "Request:Queue": add(req)
+
+alt First and second options
+  Adapter --> "Security Server Pair": OK
+  "Security Server Pair" --> "Consumer: IS": OK
+end
+
+Worker -> "Request:Queue":msg = read()
+Worker -> Worker:is_msg = \n transform(msg)
+Worker -> "Provider: IS":is_rsp = \nrequest_svc(is_msg)
+
+alt Second and third options
+    Worker -> Worker:rsp =\n transform(is_rsp)
+    Worker -> "Response:Queue":add(rsp)
+    Adapter -> "Response:Queue":msg = read()
+end
+
+alt Second option
+    Adapter --> "Security Server Pair":response()
+    "Security Server Pair" --> "Consumer: IS":response()
+end
+
+alt Third option
+    Adapter --> "Security Server Pair":deliver(response)
+    "Security Server Pair" --> "Consumer: IS":deliver(response)
+end
+
+@enduml
+
+

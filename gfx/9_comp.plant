@@ -1,0 +1,35 @@
+@startuml
+left to right direction
+
+component [Provider: \n Information System] as pis
+component [Adapter] as adapter
+component [Security Server Pair] as ss
+component [Consumer:\n Information System] as cis
+component [Communication Log] as cl
+
+interface "Perform service" as svc
+interface "Perform service" as svc2
+interface "Perform service" as svc3
+interface "Add entry" as add
+interface "Get entries" as get
+interface "Get entries" as get2
+
+pis - svc:provide
+adapter ..>svc:use
+adapter ..>add:use
+adapter - svc2:provide
+
+cl - add:provide
+cl - get:provide
+
+ss ..>svc2:use
+ss ..>get:use
+ss - get2:provide
+
+ss - svc3:provide
+cis ..>svc3:use
+cis ..>get2:use
+
+@enduml
+
+

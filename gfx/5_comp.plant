@@ -1,0 +1,39 @@
+@startuml
+
+component [Provider: \n Information System] as pis
+component [Worker] as worker
+component [Request: Queue] as req_q
+component [Response: Queue] as res_q
+component [Adapter] as adapter
+component [Security server] as ss
+component [Consumer:\n Information System] as cis
+
+interface "Add message" as add_msg
+interface "Read message" as read_msg
+interface "Add message" as add_msg2
+interface "Read message" as read_msg2
+
+interface "Perform service" as svc
+interface "Perform service" as svc2
+interface "Perform service" as svc3
+
+add_msg - req_q
+add_msg2 - res_q
+read_msg - req_q
+read_msg2 - res_q
+
+pis - svc:provide
+worker ..>svc:use
+worker ..>read_msg:use
+worker ..>add_msg2:use
+
+adapter ..>read_msg2:use
+adapter ..>add_msg:use
+adapter - svc2:provide
+ss ..>svc2:use
+
+ss - svc3:provide
+cis ..>svc3
+@enduml
+
+

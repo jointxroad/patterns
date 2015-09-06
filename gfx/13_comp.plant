@@ -1,0 +1,26 @@
+@startuml
+
+component [Provider: \n Information System] as pis
+component [Security Server Pair] as ss
+component [Consumer:\n Information System] as cis
+component [Stub] as stub
+component [Cache] as cache
+
+interface "Perform service" as svc
+interface "Perform service" as svc2
+interface "Perform service" as svc3
+interface "Retrieve / \nStore" as retrieve
+
+pis - svc:provide
+stub - svc2:provide
+cache - retrieve:provide
+stub ..> retrieve:use
+stub ..>svc3:use
+
+ss ..>svc:use
+
+ss - svc3:provide
+cis ..>svc2
+@endumL
+
+
