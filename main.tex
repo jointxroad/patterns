@@ -18,6 +18,8 @@
 \title{Technical patterns for linking organizations with X-Road}
 \author{Estonian Information System Authority}
 
+\makeindex
+
 \begin{document}
 
 \maketitle
@@ -70,21 +72,10 @@ ID & Pattern & Doc & Data & Service & Volume & Doc direction & Availability \\
 
 \subsection{Glossary}
 \begin{description}
-	\item[Consumer] The organisation initiating service access. In this document commonly referred to as Alice. The patterns are primarily described from this viewpoint
-	\item[Provider] The organisation receiving service requests. In this document commonly referred to as Bob 
-	\item[Information System] The system at Alice that needs services from Bob or, on the provider side, the system that provides the service
+	\item[Consumer]\index{Consumer} The organisation initiating service access. In this document commonly referred to as Alice. The patterns are primarily described from this viewpoint
+	\item[Provider]\index{Provider} The organisation receiving service requests. In this document commonly referred to as Bob 
+	\item[Information System]\index{Information System} The system at Alice that needs services from Bob or, on the provider side, the system that provides the service
 \end{description}
-
-\subsection{Open questions and TODO}
-\begin{itemize}
-	\item Is the recommendation for the read-through cache to be non-persistent and short-lived relevant? Also, needs more operational considerations
-	\item Is ``shared x-road library`` a pattern? We have seen people state that v6 migration is hard because it touches so many systems but implementing a client lib to encapsulate any protocol is just common sense. Should we include it nevertheless?
-\end{itemize}
-
-TODO:
-\begin{itemize}
-	\item An overview of x-road
-\end{itemize}
 
 \section{Straight up x-road}
 \label{sec:p:1}
@@ -339,5 +330,7 @@ The main operational consideration of the cache is the question of centralised o
 
 \bibliographystyle{plain}
 \bibliography{xroad_distilled} 
+\addcontentsline{toc}{section}{Index}
+\printindex
 
 \end{document}
