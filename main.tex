@@ -7,6 +7,7 @@
 \usepackage{tgpagella}
 \usepackage[T1]{fontenc}
 \usepackage[titletoc]{appendix}
+\usepackage[scale=2]{ccicons}
 
 \hypersetup{
     colorlinks=true,       % false: boxed links; true: colored links
@@ -28,7 +29,17 @@
 \setcounter{tocdepth}{2}
 \tableofcontents
 \clearpage
+\thispagestyle{empty}
+\null
+\vfill
 
+\begin{center}
+This document is licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license\\[5mm]
+
+\ccbyncsa\end{center}
+\clearpage
+
+\setcounter{section}{0}
 \section{Introduction}
 \subsection{Goal and structure}
 This is document seeks to collect descriptions of architectural patterns that make sense to be used around x-road. The patterns identified are listed in \ref{tab:dir}, but currently only two of them have been described in detail.
