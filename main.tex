@@ -42,7 +42,7 @@ This document is licensed under Creative Commons Attribution-NonCommercial-Share
 \setcounter{section}{0}
 \section{Introduction}
 \subsection{Goal and structure}
-This is document seeks to collect descriptions of architectural patterns that make sense to be used around x-road. The patterns identified are listed in \ref{tab:dir}, but currently only two of them have been described in detail.
+This is document seeks to collect descriptions of architectural patterns that make sense to be used around x-road. The patterns identified are listed in \ref{tab:dir}. The patterns are, to an extent interdependent and relate to each other in some way. For example, the reconciliator pattern described in \ref{sec:p:9}  works nicely together with asynchronous x-road provider described in \ref{sec:p:5}. These relationships are depicted on figure \ref{fig:patterns}.
 
 While all the patterns are usable, no tool is usable for every purpose. Therefore, the patterns are each classified along a set of dimensions allowing for easier navigation and comprehension. The dimensions are defined as follows:
 \begin{description}
@@ -51,8 +51,6 @@ While all the patterns are usable, no tool is usable for every purpose. Therefor
 	\item[Doc direction] Not all patterns are symmetrical in nature. If a document is passed in a transaction, it can move up, down or both ways of the stream. This column indicates, whether the pattern works well for up-stream documents (U), downstream documents (D) or can handle both directions equally well (B). The patterns not suitable for documents are not marked in this column
 	 \item[Availability] The systems being integrated might have different availability requirements. If they do, it is important to make sure the availability of one system is not compromised by the availability of the other. This dimension indicates, how the availability of the system in question compares with the one of the integrated system
 \end{description}
-
-In the document, Alice is used to denote the organisation implementing the pattern whether as a consumer or provider with Bob referring to the other side of the interaction.
 
 \begin{table}
 	\begin{center}
@@ -82,6 +80,14 @@ ID & Pattern & Doc & Data & Service & Volume & Doc direction & Availability \\
 	\end{center}
 \end{table}
 
+\begin{figure}[htp]
+	\begin{center}
+		\includegraphics[width=1\textwidth]{gfx/patterns.png}
+		\caption{Relationships of the patterns}
+		\label{fig:patterns}
+	\end{center}
+\end{figure}
+
 \subsection{Glossary}
 \begin{description}
 	\item[Consumer]\index{Consumer} The organisation initiating service access. In this document commonly referred to as Alice. The patterns are primarily described from this viewpoint
@@ -92,9 +98,17 @@ ID & Pattern & Doc & Data & Service & Volume & Doc direction & Availability \\
 \section{Straight up x-road}
 \label{sec:p:1}
 \subsection{Overview}
-This pattern encompasses the simplest possible way x-road can be used. On the consumer side, a new request towards x-road is sent via a new socket for every service request and the thread blocks until a response is received. On the service provider side, all incoming requests from the security server are immediately dispatched to the information system to be serviced.
+This pattern encompasses the simplest possible way x-road can be used. On the consumer side, a new request towards x-road is sent via a new socket for every service request and the thread blocks until a response is received. On the service provider side, all incoming requests from the security server are immediately dispatched to the information system to be serviced. The setup is illustrated by figure \ref{fig:p:1}. 
 
-TODO: insert component diagram
+\begin{figure}[htp]
+	\begin{center}
+		\includegraphics[width=1\textwidth]{gfx/1_comp.png}
+		\caption{Straight up x-road pattern}
+		\label{fig:p:1}
+	\end{center}
+\end{figure}
+
+While not ideal, the pattern is the simplest possible to implement and is thus widely spread. In a way, the rest of the patterns supplement this one by eliminating one ore more of its weaknesses in some way.
 
 \subsection{Summary}
 \begin{description}
@@ -108,23 +122,20 @@ TODO: insert component diagram
 
 \subsection{SWOT}
 \subsubsection{Strengths}
-	\begin{itemize}
-		\item The pattern is simple to implement requiring minimal architectural consideration and adding minimal complexity to the code
-	\end{itemize}
+The key strength of the pattern is that it simple to implement requiring minimal architectural consideration and adding minimal complexity to the code. Also, because of lack of moving parts, it is simple to configure and deploy. This claims back some of the otherwise considerable operational difficulty it brings.
 
 \subsubsection{Weaknesses}
-	\begin{itemize}
-		\item The main weakness, seen by Alice, is its susceptibility to positive feedback should the performance of Bob deteriorate. Typically system response times are a function of the number of parallel requests being processed: the more parallel requests, the higher the probability of them waiting for some shared resource. When this pattern is utilised on the consumer side, increasing response times from Bob mean more parallel requests (given constant incoming request flow) which in turn means lower performance on the server side which leads to even more parallel requests attempting to access Bob. The system will not recover from such a situation unless incoming request flow drops below Bob's response rate.  
-		\item The second key weakness of this pattern is its tendency to exhaust resources. Because of the feedback loop described previously, the number of parallel requests waiting for Bob will grow until the number of threads (or another limiting resource) is exhausted. This means that even if minority of users of Alice require a badly performing service from Bob, eventually all users will suffer as Alice runs out of resources. 
-	\end{itemize} 
-
+The pattern is also difficult to troubleshoot. Usually live applications are not equipped with sufficient telemetry to detect the reasons why the system is running out of a resource (especially if it is something that is limited by the operating system like threads). Thus, an x-road call from the request processing thread can remain hanging without a good way of detecting or remedying the situation
+	
 \subsubsection{Opportunities}
-	\begin{itemize}
-		\item O1
-	\end{itemize}
+Using a simple x-road integration allows one to get up and running quickly and efficiently
 
 \subsubsection{Threats}
-TODO
+	\begin{itemize}
+		\item Seen by Alice, the pattern is susceptible to positive feedback should the performance of Bob deteriorate. Typically system response times are a function of the number of parallel requests being processed: the more parallel requests, the higher the probability of them waiting for some shared resource. When this pattern is utilised on the consumer side, increasing response times from Bob mean more parallel requests (given constant incoming request flow) which in turn means lower performance on the server side which leads to even more parallel requests attempting to access Bob. The system will not recover from such a situation unless incoming request flow drops below Bob's response rate. This is usually known as dynamic complexity leakage.\index{Dynamic complexity!leakage}
+		\item The pattern tends to exhaust resources. Because of the feedback loop described previously, the number of parallel requests waiting for Bob will grow until the number of threads (or another limiting resource) is exhausted. This means that even if minority of users of Alice require a badly performing service from Bob, eventually all users will suffer as Alice runs out of resources. 
+	\end{itemize} 
+
 
 \subsection{Operational considerations}
 TODO

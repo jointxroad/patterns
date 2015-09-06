@@ -1,0 +1,19 @@
+@startuml
+
+component [Provider: \n Information System] as pis
+component [Security server] as ss
+component [Consumer:\n Information System] as cis
+
+
+interface "Perform service" as svc
+interface "Perform service" as svc2
+
+pis - svc:provide
+
+ss ..>svc:use
+
+ss - svc2:provide
+cis ..>svc2
+@enduml
+
+
