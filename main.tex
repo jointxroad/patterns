@@ -125,7 +125,10 @@ While not ideal, the pattern is the simplest possible to implement and is thus w
 The key strength of the pattern is that it simple to implement requiring minimal architectural consideration and adding minimal complexity to the code. Also, because of lack of moving parts, it is simple to configure and deploy. This claims back some of the otherwise considerable operational difficulty it brings.
 
 \subsubsection{Weaknesses}
-The pattern is also difficult to troubleshoot. Usually live applications are not equipped with sufficient telemetry to detect the reasons why the system is running out of a resource (especially if it is something that is limited by the operating system like threads). Thus, an x-road call from the request processing thread can remain hanging without a good way of detecting or remedying the situation
+\begin{itemize}
+	\item The pattern is difficult to troubleshoot. Usually live applications are not equipped with sufficient telemetry to detect the reasons the system is running out of a resource (especially if it is something that is limited by the operating system like threads). Thus, an x-road call from the request processing thread can remain hanging without a good way of detecting or remedying the situation.
+	\item The pattern does not recover well from incoming request spikes. The response time of Bob depends on the number of parallel requests at Alice. Therefore, should the number of incoming requests grow rapidly, Bob's response time will not improve unless the incoming request rate drops below the rate at which Bob is able to service requests during the spike. This can be a much lower number than under normal conditions. Since load spikes can be hard to observer directly, the system can suffer low performance for no apparent reason: the load is average but response times are much higher. 
+\end{itemize}
 	
 \subsubsection{Opportunities}
 Using a simple x-road integration allows one to get up and running quickly and efficiently
