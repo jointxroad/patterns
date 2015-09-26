@@ -1,12 +1,28 @@
 graph g {
 	overlap=prism;
 	splines=true;
-	overlap_scaling=55
-	"Consumer pool" -- "Straight up xRoad"
-	"Reconciliator" -- "Asynchronous xRoad";
-	"Adapter" -- "Asynchronous xRoad";
-	"Asynchronous xRoad" -- "Deliver at least once";
-	"Deliver at least once" -- "Reconciliator";
-	"Dead letter" -- "Asynchronous xRoad";
+	//overlap_scaling=5
+	 "Straight up xRoad" --  "Consumer pool" 
+	 "Straight up xRoad" --  "Adapterserver" 
+	 "Straight up xRoad" --  "DVK" 
+	 "Straight up xRoad" --  "Async xRoad provider/consumer"
+	 "Straight up xRoad" --  "Async xRoad SS" 
+	 "Straight up xRoad" --  "Gateway to xRoad" 
+	 "Straight up xRoad" --  "Reconciliator" 
+	 "Straight up xRoad" --  "Dead Letter" 
+	 "Straight up xRoad" --  "Document store" 
+	 "Straight up xRoad" --  "Replica" 
+	 "Straight up xRoad" --  "Read-through cache"
+	 "Straight up xRoad" --  "Pub-sub"
+	 "Straight up xRoad" --  "Delivery at least once" 
+	 "Straight up xRoad" --  "Aggregated middleware"
+	"Reconciliator" -- "Async xRoad provider/consumer";
+	"Adapterserver" -- "Async xRoad provider/consumer";
+	"Async xRoad provider/consumer" -- "Delivery at least once";
+	"Delivery at least once" -- "Reconciliator";
+	// "Dead Letter" -- "Asynchronous xRoad"[style=dashed];
+	"Dead Letter" -- "Async xRoad provider/consumer";
+	"Adapterserver" -- "Read-through cache"[style=dashed];
+	"Read-through cache" -- "Replica"[style=dashed];
 }
 
