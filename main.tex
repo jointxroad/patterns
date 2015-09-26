@@ -291,6 +291,7 @@ Since a two-phase commit problem now exists between an information system and th
 
 In terms of monitoring, the communication log is meant to potentially be able to recover from data loss spanning the entire life time of the system. For large and old systems, this might lead to unreasonable storage requirements. Thus it is recommended that the reconciliation horizon is agreed upon and enforced. 
 
+
 \section{Read-through cache}
 \label{sec:p:13}
 \subsection{Overview}
@@ -336,6 +337,7 @@ If a question of persistent or in-memory cache arises, the applicability of the 
 	 	\begin{itemize}
 			\item Should the information exchanged be temporally sensitive (e.g. authorisation information), the business logic must account for the fact that the cache might be out of date creating a dependency between business and technical architectures. This might be achieved by explicitly stating propagation times for information, for example or establishing operational procedures for keeping cache TTL values sufficiently short 
 			\item The pattern assumes the underlying service not to change its internal state as a result of a service call. Should that not be the case, undefined behaviour arises as the service calls from the client have no relationship to the service calls actually executed on the server
+			\item As a copy of Bobs data is stored by Alice, the same risk management measures need to be implemented by both parties. If the overall risk level at Alice is higher than at Bob, this does not necessarily present a problem. Should Bob be significantly more risk-averse than Alice, the required increase in risk management measures by Alice might render the pattern unusable
 		\end{itemize}
 
 \subsubsection{Opportunities}	
@@ -351,6 +353,9 @@ If a question of persistent or in-memory cache arises, the applicability of the 
 
 \subsection{Operational considerations}
 The main operational consideration of the cache is the question of centralised or distributed cache. In case of a central cache, all sub-systems of Alice access Bob via the same cache. This, however, creates a single point of failure and a scaling bottleneck while ensuring consistent results for the entire system. Also, an additional network hop is added between nodes and the cache. Local caches for sub-systems or component instances lead to lower latency and a more robust setup but can lead to inconsistencies in system behaviour depending on whether a particular node hits cache or not. 
+
+Another important consideration is the one of cache persistency. Non-persistent cache is operationally simple and offers low latency. Should the memory be lost, however, stub response times spike as all cache requests become misses. Such sudden change in response times can trigger dynamically complex behavior upstream. A persistent cache, while free from the need to re-population after downtime, is operationally more complex requiring storage and offers higher latency due to IO access involved. With persistent cache, the weakness of risk management is significantly more pronounced.
+
 
 \clearpage
 \begin{appendices}
