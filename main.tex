@@ -64,7 +64,7 @@ ID & Pattern & Doc & Data & Service & Volume & Doc direction & Availability \\
 4 & DVK & X &  &  & M & B & > \\
 5 & Async xRoad provider/consumer & X & X & X & L & U/D & $\leq$ \\
 7 & Async xRoad SS & X & X &  & M & B & eq \\
-8 & Gateway to xRoad &  & X & X & L &   & $\geq$ \\
+8 & Gateway to xRoad &  & X & X & L &  B & $\geq$ \\
 9 & Reconciliator & X & X & X & XL & B & $\leq$ \\
 10 & Dead Letter & X & X &  & XL & U & > \\
 11 & Document store & X & X &  & L & U & > \\
@@ -232,6 +232,73 @@ In case the demand can not indeed be satisfied, the adapter should be able to gr
 Another operational consideration for this pattern is the availability of the queues. Since they play a key role in system availability, they should have a very robust availability model preventing data loss. For these purposes, it is probably a good idea to share the queue provider between different systems so headroom can be pooled.
 
 Finally, this patterns can grow operationally more complex if more than one instance of the Adapter component are present. With one adapter, it can be guaranteed that the same component that maintains a connection to the customer via the SecurityServer also receives a response message. With multiple adapters this is no longer the case. For multiple Adapters to work, the messages passed must contain a reference to the adapter as well as the originating connection and the queue implementation must support ''peeking'' i.e. looking at a message and returning it to the queue untouched.
+ 
+% Pattern boundary
+\section{Gateway to x-road}
+\label{sec:p:8}
+\subsection{Overview}
+Sometimes it is desirable to interact with x-road from a secondary context that might use different protocols or security models. For example, a Javascript based user interface deployed in the browser might need to execute x-road queries. One might also envision a collection of CORBA-based legacy systems. A gateway can also translate between interaction paradigms providing synchronous clients access to asynchronous services and vice versa.
+
+In such a case, a gateway needs to be implemented that performs the security context switch as well as translating protocols. The setup is illustrated by figure \ref{fig:p:8}. 
+
+\begin{figure}[htp]
+	\begin{center}
+		\includegraphics[width=1\textwidth]{gfx/8_comp.png}
+		\caption{Gateway to x-road pattern}
+		\label{fig:p:8}
+	\end{center}
+\end{figure}
+
+
+\subsection{Summary}
+\begin{description}
+	\item[Paradigm orientation] The gateway pattern is less suitable for document-based interaction than it is for data and services
+	\item[Volume preference] Because of added complexity of protocol and security context translation, the pattern is best for medium to large volumes
+	\item[Direction] The gateway pattern is direction-agnostic 
+	\item[Availability] As the gateway provides an additional failure handling facility, it is suitable for situations with Alice having higher availability requirements than Bob
+\end{description}
+
+\subsection{Details}
+TODO
+
+\subsection{SWOT}
+\subsubsection{Strengths}
+\begin{itemize}
+	\item Provides clean separation of concerns
+	\item Provides an explicit security boundary the SS does not have
+	\item Inherently stateless and therefore easy to scale
+\end{itemize}
+
+\subsubsection{Weaknesses}
+\begin{itemize}
+	\item Another moving element in the signal chain
+	\item Necessarily breaks end-to-end encryption
+\end{itemize}
+	
+\subsubsection{Opportunities}
+\begin{itemize}
+	\item Logging/SLA monitoring
+	\item Transparent failure handling and failover
+	\item Load balancing and routing
+\end{itemize}
+
+
+\subsubsection{Threats}
+	\begin{itemize}
+		\item Reliance on an external session box: who controls the authorisations?
+		\item The way the gw uses the security server must match the way in which it is scaled
+		\item Fundamentally on system boundary, security needs to be taken seriously
+	\end{itemize} 
+
+
+\subsection{Operational considerations}
+	\begin{itemize}
+		\item Reliance on an external session box: who controls the authorisations?
+		\item The way the gw uses the security server must match the way in which it is scaled
+	\end{itemize} 
+
+
+% Pattern boundary 
  
 \section{Reconciliator}
 \label{sec:p:9}

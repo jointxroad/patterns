@@ -1,0 +1,28 @@
+@startuml
+
+component [Provider: \n Information System] as pis
+component [Security server] as ss
+component [Consumer:\n Information System] as cis
+component [Gateway] as gw
+component [Gatekeeper] as kk
+
+
+interface "Perform service" as svc_by_provider
+interface "Perform service" as svc_by_SS
+interface "Foreign service" as svc_a
+interface "Check permissions" as sess
+
+pis - svc_by_provider:provide
+
+ss ..>svc_by_provider:use
+
+kk - sess:provide
+gw ..>sess:use
+ss - svc_by_SS:provide
+gw - svc_a:provide
+gw ..>svc_by_SS:use
+cis ..>svc_a:use
+
+@enduml
+
+
