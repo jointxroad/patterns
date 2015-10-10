@@ -128,6 +128,7 @@ The key strength of the pattern is that it simple to implement requiring minimal
 \begin{itemize}
 	\item The pattern is difficult to troubleshoot. Usually live applications are not equipped with sufficient telemetry to detect the reasons the system is running out of a resource (especially if it is something that is limited by the operating system like threads). Thus, an x-road call from the request processing thread can remain hanging without a good way of detecting or remedying the situation.
 	\item The pattern does not recover well from incoming request spikes. The response time of Bob depends on the number of parallel requests at Alice. Therefore, should the number of incoming requests grow rapidly, Bob's response time will not improve unless the incoming request rate drops below the rate at which Bob is able to service requests during the spike. This can be a much lower number than under normal conditions. Since load spikes can be hard to observer directly, the system can suffer low performance for no apparent reason: the load is average but response times are much higher. 
+	\item The security server in itself does not provide load balancing requiring an external mechanism for handling large volumes of either incoming or outgoing requests
 \end{itemize}
 	
 \subsubsection{Opportunities}
@@ -137,6 +138,7 @@ Using a simple x-road integration allows one to get up and running quickly and e
 	\begin{itemize}
 		\item Seen by Alice, the pattern is susceptible to positive feedback should the performance of Bob deteriorate. Typically system response times are a function of the number of parallel requests being processed: the more parallel requests, the higher the probability of them waiting for some shared resource. When this pattern is utilised on the consumer side, increasing response times from Bob mean more parallel requests (given constant incoming request flow) which in turn means lower performance on the server side which leads to even more parallel requests attempting to access Bob. The system will not recover from such a situation unless incoming request flow drops below Bob's response rate. This is usually known as dynamic complexity leakage.\index{Dynamic complexity!leakage}
 		\item The pattern tends to exhaust resources. Because of the feedback loop described previously, the number of parallel requests waiting for Bob will grow until the number of threads (or another limiting resource) is exhausted. This means that even if minority of users of Alice require a badly performing service from Bob, eventually all users will suffer as Alice runs out of resources. 
+		\item Since the security server assumes safe network context, a breach of network perimeter can lead the attacker to access all X-Road services on behalf of the organisation unless additional access control measures (like the gateway pattern described in section \ref{sec:p:8}) are implemented.
 	\end{itemize} 
 
 
@@ -237,7 +239,7 @@ Finally, this patterns can grow operationally more complex if more than one inst
 \section{Gateway to x-road}
 \label{sec:p:8}
 \subsection{Overview}
-Sometimes it is desirable to interact with x-road from a secondary context that might use different protocols or security models. For example, a Javascript based user interface deployed in the browser might need to execute x-road queries. One might also envision a collection of CORBA-based legacy systems. A gateway can also translate between interaction paradigms providing synchronous clients access to asynchronous services and vice versa.
+Sometimes it is desirable to interact with x-road from a secondary context that might use different protocols or security models. For example, a Javascript\index{JavaScript} based user interface deployed in the browser might need to execute x-road queries. One might also envision a collection of CORBA-based legacy systems. A gateway can also translate between interaction paradigms providing synchronous clients access to asynchronous services and vice versa.
 
 In such a case, a gateway needs to be implemented that performs the security context switch as well as translating protocols. The setup is illustrated by figure \ref{fig:p:8}. 
 
@@ -259,43 +261,49 @@ In such a case, a gateway needs to be implemented that performs the security con
 \end{description}
 
 \subsection{Details}
-TODO
+For protocol translation, the gateway must, in most cases, necessarily implement something listening to a socket on one side and something writing to a socket connection on the other. Such a situation of having to implement relatively fast-running logic between two relatively high-latency connections can easily lead to inefficiencies in resource use. For example, incoming sockets and threads could end up waiting for the service behind the security server to respond. Therefore, an asynchronous mechanism separating the concerns of listening to requests, translating them and passing them on to the security server is usually desirable.
+
+In addition to protocol translation, the gateway must have knowledge of message routing. In the simplest case, this is simply comprised of the security server location and the service details to be called. In more complex situations, however, the gateway might need to decide upon the service and security server details based on the incoming request. This usually necessitates a dynamic mapping algorithm or a separate configuration that needs to be kept updated as the target service information changes  and new services are added (see \ref{sec:p:8:ops}). 
+
+To successfully translate between different security domains, the gateway myst be able to translate both credentials and access rules. As opposed to relatively static routing information, information on security credentials and access control is highly dynamic. Therefore, it would be desirable to have an external identity provider residing in the security domain of the accessing system. The gateway, acting as a Service Provider, could utilise a SAML\index{SAML}-like protocol to obtain an identity assertion from the identity provider. Based on this, access to services brokered by the security server could be granted. This implies that the need to be aware of routing changes is there for the identity provider as well: it is not possible to grant access to a service one is not aware of. 
 
 \subsection{SWOT}
 \subsubsection{Strengths}
 \begin{itemize}
-	\item Provides clean separation of concerns
-	\item Provides an explicit security boundary the SS does not have
-	\item Inherently stateless and therefore easy to scale
+	\item Clean separation of concerns. The gateway pattern cleanly separates between three different concerns: accessing services, providing identity and providing services. This allows the security server not to care about external identity providers or protocol implementations while the accessing system does not need to know about security server implementation details
+	\item Explicit security boundary. By design, the security server assumes the incoming service requests to be legitimate. The gateway pattern implements an explicit access control boundary to X-Road allowing for arbitrarily fine-grained security configuration 
+	\item The gateway is easy to scale. As there is no inherent reason for the gateway to have persistent state, it is easy to scale horizontally
 \end{itemize}
 
 \subsubsection{Weaknesses}
 \begin{itemize}
-	\item Another moving element in the signal chain
-	\item Necessarily breaks end-to-end encryption
+	\item More moving parts. Another moving element in the signal chain increases system complexity makes monitoring, reliability, message routing etc. more difficult. Because of the exponential nature of complexity, one additional element could push the system complexity beyond the capabilities of the organisation.
+	\item Breaks end-to-end encryption. Since the gateway usually executes protocol translation, it breaks end-to-end encryption. This makes the gateway a sensitive spot in terms of logging and application integrity. 
 \end{itemize}
 	
 \subsubsection{Opportunities}
 \begin{itemize}
-	\item Logging/SLA monitoring
-	\item Transparent failure handling and failover
-	\item Load balancing and routing
+	\item Logging/SLA monitoring. As the gateway sees all requests passing to and from the security server, it can implement flow-dependent services like SLA monitoring or audit logging
+	\item Failover and load balancing. Because the gateway controls the routing mechanism and does protocol translation, it can provide transparent failure handling and failover in case either the security server or services behind it are not available. The gateway can also provide load balancing between security server instances
+	\item Asynchronicity translation.\index{Asynchronous services} Because the gateway implements protocol translation, it can also implement an abstraction layer hiding either synchronicity or asynchronicity of the services behind the security server. It could implement a synchronous API while actually sending messages to service providers and waiting for response. It could also implement a call-back mechanism for accessing high-latency backend services
+	\item Graceful downtime. As the gateway, by definition, is the way to access back-end services it provides a convenient way to handle service downtime. Should the security server itself or Bobs service experience planned downtime, the gateway can be used to either re-route the requests or respond with appropriate error messages in a controlled fashion
 \end{itemize}
 
 
 \subsubsection{Threats}
 	\begin{itemize}
-		\item Reliance on an external session box: who controls the authorisations?
-		\item The way the gw uses the security server must match the way in which it is scaled
-		\item Fundamentally on system boundary, security needs to be taken seriously
+		\item The need for an external identity provider. Abstracting access control logic from the gateway to an external identity provider does not make the logic simpler or easier to defend. As the identity provider controls all access to the security server, it should be treated as a sensitive piece of software it is. Also, the gateway must implement measures of validating the identity of the identity provider and secure communications with it
+		\item Weak point in security. As the gateway fundamentally is located on the system boundary and, commonly, breaks encryption, it is an obvious attack for a target. Therefore, its interfaces, protocol implementations and operational parameters must be treated accordingly
 	\end{itemize} 
 
 
 \subsection{Operational considerations}
-	\begin{itemize}
-		\item Reliance on an external session box: who controls the authorisations?
-		\item The way the gw uses the security server must match the way in which it is scaled
-	\end{itemize} 
+\label{sec:p:8:ops}
+Firstly, the gateway relies heavily on the identity provider for request processing. Therefore, while the gateway might be easy to scale, it still depends on performance and availability of the identity provider making the latter the choke point of the system. 
+
+Secondly, the gateway needs to be monitored for security server performance. While issues with the service being called should not have an impact on the security server performance, they should still be monitored for. Certain service calls taking abnormally long time, internal queues filling up, etc. should be kept an eye on. It is also a good idea to implement the gateway in a manner that allows for graceful degradation of service returning meaningful error messages rather than having the client time out.
+
+Finally, the gateway should be closely monitored for routing issues. Any mapping between address spaces assumes certain stability on both sides. Thus, changes in either can lead to issues only detectable at the gateway. For example, a new user interface might make use of a new X-Road service that has not been properly configured at the gateway or identity provider. 
 
 
 % Pattern boundary 
@@ -428,9 +436,9 @@ Another important consideration is the one of cache persistency. Non-persistent 
 \begin{appendices}
 \section{X-road overview}
 \subsection{Background}
-Since very early in the history of computing, smart people have wondered about making systems scalable and maintainable. At a 1968 software engineering conference sponsored by NATO \citep{naur1969software}, the idea of middleware\index{Middleware} was put forth to support the vital system properties of modularity, specification and generality.
+Since very early in the history of computing, smart people have wondered about making systems scalable and maintainable. At a 1968 software engineering conference sponsored by NATO \citep{naur1969software}, the concept of middleware\index{Middleware} was put forth to support the vital system properties of modularity, specification and generality.
 
-The idea of middleware\index{middleware} is deceptively simple: to have a unified separation layer between consumers and producers of various services. The main goals of such separation are as follows:
+The idea of middleware is deceptively simple: to have a unified separation layer between consumers and producers of various services. The main goals of such separation are as follows:
 \begin{itemize}
 	\item Minimise the number of peer to peer negotiations between parties 
 	\item Establish a centralised mechanism for enforcing all sorts of policies like API standards, access rights and so forth
