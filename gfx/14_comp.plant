@@ -1,0 +1,49 @@
+@startuml
+
+component [Pusher] as pusher
+component [Queue] as queue
+component [Worker] as worker
+component [Provider: \n Information System] as pis
+component [Security Server Pair] as ss
+
+component [Receiver] as receiver
+component [Consumer:\n Information System] as cis
+
+component [SubscriptionDB] as subsdb
+component [Subscriber] as subscriber
+
+
+interface "Add message" as add_msg
+interface "Read message" as read_msg
+interface "Deliver event" as change
+interface "Deliver event" as change2
+interface "Deliver event" as change3
+interface "Subscribe/unsubscribe" as subs
+interface "Subscribe/unsubscribe" as subs2
+interface "Store subscription" as subs3
+interface "Get subscribers" as getsubs
+
+subsdb-subs3:provide
+ss-subs2:provide
+subscriber-subs:provide
+cis ..>subs2:use
+subscriber-subs3:use
+subsdb-getsubs:provide
+worker ..>getsubs:use
+
+
+pis ->pusher
+queue - add_msg:provide
+queue - read_msg:provide
+pusher ..> add_msg:use
+worker ..> read_msg:use
+ss - change:provide
+worker ..>change:use
+receiver - change2:provide
+ss ..> change2:use
+cis - change3:provide
+receiver ..>change3:use
+
+@endumL
+
+

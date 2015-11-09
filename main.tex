@@ -26,7 +26,7 @@
 
 \maketitle
 \clearpage
-\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{1}
 \tableofcontents
 \clearpage
 \thispagestyle{empty}
@@ -42,7 +42,7 @@ This document is licensed under Creative Commons Attribution-NonCommercial-Share
 \setcounter{section}{0}
 \section{Introduction}
 \subsection{Goal and structure}
-This is document seeks to collect descriptions of architectural patterns that make sense to be used around x-road. The patterns identified are listed in \ref{tab:dir}. The patterns are, to an extent interdependent and relate to each other in some way. For example, the reconciliator pattern described in \ref{sec:p:9}  works nicely together with asynchronous x-road provider described in \ref{sec:p:5}. These relationships are depicted on figure \ref{fig:patterns}.
+This is document seeks to collect descriptions of architectural patterns that make sense to be used around x-road. The patterns identified are listed in \ref{tab:dir}. 
 
 While all the patterns are usable, no tool is usable for every purpose. Therefore, the patterns are each classified along a set of dimensions allowing for easier navigation and comprehension. The dimensions are defined as follows:
 \begin{description}
@@ -54,39 +54,28 @@ While all the patterns are usable, no tool is usable for every purpose. Therefor
 
 \begin{table}
 	\begin{center}
-		\begin{tabular}{p{.6cm}p{3.4cm}p{.8cm}p{.8cm}p{.8cm}p{.8cm}p{1.2cm}p{1.2cm}}
+		\begin{tabular}{p{.5cm}p{3.4cm}p{.9cm}p{.7cm}p{.7cm}p{.8cm}p{.8cm}p{1.2cm}p{1.2cm}}
 		\toprule
-ID & Pattern & Doc & Data & Service & Volume & Doc direction & Availability \\
+ID & Pattern & Section & Doc & Data & Service & Volume & Doc direction & Availability \\
 \midrule
-1 & Straight up xRoad &  & X &  & S &   & eq \\
-2 & Consumer pool & X & X & X & M & D & $\geq$ \\
-3 & Adapterserver &  & X &  & S &   & eq \\
-4 & DVK & X &  &  & M & B & > \\
-5 & Async xRoad provider/consumer & X & X & X & L & U/D & $\leq$ \\
-7 & Async xRoad SS & X & X &  & M & B & eq \\
-8 & Gateway to xRoad &  & X & X & L &  B & $\geq$ \\
-9 & Reconciliator & X & X & X & XL & B & $\leq$ \\
-10 & Dead Letter & X & X &  & XL & U & > \\
-11 & Document store & X & X &  & L & U & > \\
-12 & Replica &  & X &  & XL &   & $\gg$ \\
-13 & Read-through cache &  & X &  & XL &   & $\gg$ \\
-14 & Pub-sub &  & X &  & L &  & < \\
-15 & Delivery at least once & X & X & & XL & U/D & $\geq$ \\
-16 & Aggregated middleware & X & X & X & XL & U/D & eq \\
+1 & Straight up xRoad & \ref{sec:p:1} & X &  & S &   & eq \\
+2 & Consumer pool & & X & X & X & M & D & $\geq$ \\
+3 & Adapterserver & &  & X &  & S &   & eq \\
+4 & DVK & & X &  &  & M & B & > \\
+5 & Async xRoad provider/consumer & \ref{sec:p:5}  & X & X & X & L & U/D & $\leq$ \\
+8 & Gateway to xRoad & \ref{sec:p:8}  &  & X & X & L &  B & $\geq$ \\
+9 & Reconciliator  & \ref{sec:p:9} & X & X & X & XL & B & $\leq$ \\
+10 & Dead Letter & & X & X &  & XL & U & > \\
+11 & Document store &  & X & X &  & L & U & > \\
+13 & Read-through cache  & \ref{sec:p:13}  &  & X &  & XL &   & $\gg$ \\
+14 & Pub-sub  & \ref{sec:p:14} &  & X &  & L &  & < \\
+16 & Aggregated middleware & & X & X & X & XL & U/D & eq \\
 \bottomrule
 		\end{tabular}
 		\caption{Summary of the patterns}
 		\label{tab:dir}
 	\end{center}
 \end{table}
-
-\begin{figure}[htp]
-	\begin{center}
-		\includegraphics[width=1\textwidth]{gfx/patterns.png}
-		\caption{Relationships of the patterns. A solid line indicates that the patters can be combined, a dashed line indicates patterns can be evolved into each other}
-		\label{fig:patterns}
-	\end{center}
-\end{figure}
 
 \subsection{Glossary}
 \begin{description}
@@ -95,6 +84,7 @@ ID & Pattern & Doc & Data & Service & Volume & Doc direction & Availability \\
 	\item[Information System]\index{Information System} The system at Alice that needs services from Bob or, on the provider side, the system that provides the service
 \end{description}
 
+% Pattern boundary 
 \section{Straight up x-road}
 \label{sec:p:1}
 \subsection{Overview}
@@ -145,6 +135,7 @@ Using a simple x-road integration allows one to get up and running quickly and e
 \subsection{Operational considerations}
 TODO
 
+% Pattern boundary 
 \section{Asynchronous x-road provider/consumer}
 \label{sec:p:5}
 \subsection{Overview}
@@ -365,6 +356,7 @@ Form the operational perspective, the pattern offers few specific challenges. Al
 Since a two-phase commit problem now exists between an information system and the communication log, these two should be deployed in a way that minimises network uncertainty. Ideally, a shared transactional context might be used but shared hardware also provides some assurance. 
 
 In terms of monitoring, the communication log is meant to potentially be able to recover from data loss spanning the entire life time of the system. For large and old systems, this might lead to unreasonable storage requirements. Thus it is recommended that the reconciliation horizon is agreed upon and enforced. 
+% Pattern boundary 
 
 
 \section{Read-through cache}
@@ -400,7 +392,7 @@ In case Bob is cache-aware, it is recommended to follow the ideas of cache contr
 
 An important parameter of the pattern is cache duration, he period of time for which a cached copy is retained. A relatively short period compared to the expected change cadence of the data is recommended as various business logic, security and operational issues increase exponentially relative to the cache duration. 
 
-If a question of persistent or in-memory cache arises, the applicability of the pattern should be questioned. A persistent cache assumes long-lived data that is used frequently but is expensive to query. For these cases, an explicit local replica (TODO: insert pattern reference here) is probably a better idea.
+If a question of persistent or in-memory cache arises, the applicability of the pattern should be questioned. A persistent cache assumes long-lived data that is used frequently but is expensive to query. For these cases, an explicit local replica created using the pub-sub pattern (see section \ref{sec:p:14}) is probably a better idea.
 
 \subsection{SWOT}
 \subsubsection{Strengths}
@@ -417,8 +409,8 @@ If a question of persistent or in-memory cache arises, the applicability of the 
 
 \subsubsection{Opportunities}	
 	 	\begin{itemize}
-			\item Replica. Should the cache implement a persistent data store, that can be used as local copy of the remote database. Also, the pattern can be in conjunction with the replica pattern (TODO: insert reference)
-			\item Transparent integration. Since the pattern contains a ``Stub`` that, transparently, provides the service to the information system, the entire interaction logic can be replaced if need be. For example, the solution might be moved from pull to push model and cache replaced with a full replica pattern
+			\item Replica. Should the cache implement a persistent data store, that can be used as local copy of the remote database. Also, the pattern can be in conjunction with the replica using the pub-sub pattern (see section \ref{sec:p:14})
+			\item Transparent integration. Since the pattern contains a ``Stub`` that, transparently, provides the service to the information system, the entire interaction logic can be replaced if need be. For example, the solution might be moved from pull to push model and cache replaced with a full replica of the database
 		\end{itemize}
 		
 \subsubsection{Threats}	
@@ -429,8 +421,74 @@ If a question of persistent or in-memory cache arises, the applicability of the 
 \subsection{Operational considerations}
 The main operational consideration of the cache is the question of centralised or distributed cache. In case of a central cache, all sub-systems of Alice access Bob via the same cache. This, however, creates a single point of failure and a scaling bottleneck while ensuring consistent results for the entire system. Also, an additional network hop is added between nodes and the cache. Local caches for sub-systems or component instances lead to lower latency and a more robust setup but can lead to inconsistencies in system behaviour depending on whether a particular node hits cache or not. 
 
-Another important consideration is the one of cache persistency. Non-persistent cache is operationally simple and offers low latency. Should the memory be lost, however, stub response times spike as all cache requests become misses. Such sudden change in response times can trigger dynamically complex behavior upstream. A persistent cache, while free from the need to re-population after downtime, is operationally more complex requiring storage and offers higher latency due to IO access involved. With persistent cache, the weakness of risk management is significantly more pronounced.
+Another important consideration is the one of cache persistency. Non-persistent cache is operationally simple and offers low latency. Should the memory be lost, however, stub response times spike as all cache requests become misses. Such sudden change in response times can trigger dynamically complex behaviour upstream. A persistent cache, while free from the need to re-population after downtime, is operationally more complex requiring storage and offers higher latency due to IO access involved. With persistent cache, the weakness of risk management is significantly more pronounced.
 
+% Pattern boundary 
+\section{Pub-sub}
+\label{sec:p:14}
+\subsection{Overview}
+Let us assume Alice needs to let a potentially large but unspecified number of parties know about events occurring in their information system. A common example of this would be a need to replicate a dataset to a number of locations. In case polling would lead to a overwhelming percentage of requests yield the same result (because of large number or partners or infrequent changes) or availability requirements for Alice are low, a pub-sub pattern would be helpful. 
+
+This pattern means any partner can subscribe and unsubscribe to events and that Alice takes the responsibility to notify subscribers of events as they occur. Alice needs to implement a ``subscribe`` service while all the partners need to implement a ``receive a message`` service. Since it would be beneficial isolate the act of sending notifications from any actual events in the information system, an asynchronous mechanism is implemented.
+
+The pattern is depicted on figure \ref{fig:p:14}.
+
+
+\begin{figure}[htp]
+	\begin{center}
+		\includegraphics[width=1\textwidth]{gfx/14_comp.png}
+		\caption{The pub-sub pattern}
+		\label{fig:p:14}
+	\end{center}
+\end{figure}
+
+
+\subsection{Summary}
+\begin{description}
+	\item[Paradigm orientation] The pattern is mainly suitable for data-oriented applications as one of its key use cases is to transmit information of changes in state
+	\item[Volume preference] The pattern has no direct volume preferences and can be made to work with a very large number of changes
+	\item[Direction] The pattern can be used on both sides of the service
+	\item[Availability] The pattern is suitable and useful when one side, the data provider, has smaller availability requirements as the data consumer
+\end{description}
+
+\subsection{Details}
+The patterns is relatively complex in nature and a brief overview of functions of the depicted components is as follows.
+
+\begin{description}
+	\item[Pusher] is responsible for extracting event information from the source information system. The event in question might be generated by a trigger in a database, by a business logic workflow or a batch process and the pusher is responsible for preparing the relevant message and pushing it into the queue
+	\item[Queue] the exact details of the queue implementation are not relevant for the pattern, the only needed functionality is the ability to persist messages, deliver them and provide monitoring facilities. It is however important to keep in mind that the delivery semantics of the queue and the ``deliver event`` interface match. For example, the latter should not make promises on message ordering if the queue does not
+	\item[Worker] The worker is tasked with reading messages from the queue and delivering them to the subscribers based on subscription information. For higher loads, it is recommended the actual act of delivering a message to the subscriber is separated from the reading messages from the queue. This way, multiple subscribers can be notified in parallel and a parallel processing framework like Parallel Python\footnote{\url{http://www.parallelpython.com/}} can be used to spread the load among multiple nodes. It is also possible to combine the worker component with the asynchronous x-road pattern (see section \ref{sec:p:5}) with separate delivery queues for each consumer. This way one slow receiver will not block other subscribers from receiving their events. It is crucial the failure mode of the worker is documented and clearly communicated as mismatching interpretations of it might lead to loss of information for subscribers
+	\item[Receiver] is the component on the message receiver side that exposes the callback interface and passes the event on for processing. Again, it is a prime candidate for the asynchronous x-road pattern. 
+	\item[SubscriptionDB] implements persistence of subscriptions. Since it is not necessarily heavily used and might even be manually managed, as the subscriber component is optional, the implementation might even be a flat file
+	\item[Subscriber] provides the x-road service for subscribing and unsubscribing. Depending on the implementation, subscription information might include callback information, event types subscribed to or failure modes	
+\end{description}
+
+Should the pattern be used for data replication, it would be sensible to combine it with the reconciliator pattern (see section \ref{sec:p:9}) to make sure no events have been missed.
+
+A crucial part of the pattern is the ``Deliver event`` interface. Its semantics should be well understood and clearly communicated. Because detecting duplicate messages on the producer side is unlikely to be feasible, the messages are most likely going to be delivered \emph{at least} once not \emph{exactly} once. This puts the burden of duplicate checking on the subscriber side. Secondly, the interface could either be defined as message specific (e.g. NotifyOfChangeInAlicesDatabase) or message agnostic (e.g. NotifyOfGenericChange). For protocol transparency, the specific approach is preferred although multiple message types with several partners could make the agnostic design preferable.
+
+\subsection{SWOT}
+\subsubsection{Strengths}
+\begin{itemize}
+	\item The pattern allows to implement complex business logic for handling subscriptions while isolating that logic from the source system
+	\item As the main activity comes from the event source, it allows for integration of systems with a wide range of availability requirements. It might be feasible for Alice to disappear for prolonged periods of time (during which periods polling would be unavailable) and send out bursts of accumulated events
+\end{itemize}
+
+
+\subsubsection{Weaknesses}
+\begin{itemize}
+	\item The pattern is relatively complex with many moving parts. In case asynchronous mechanisms are used for message delivery to subscribers, the system might entail tens of separate components. Therefore the overhead of operational complexity of polling must be very convincing for the pattern to make sense
+	\item The pattern is relatively failure-prone as the asynchronous delivery mechanisms can make little guarantees about delivery timing or certainty. Therefore, the pattern should be accompanied by the reconciliator pattern assuring mutually compatible understanding
+\end{itemize}
+	
+\subsubsection{Opportunities}
+The main opportunity presented by the pattern is to be able to do database replication. Since it could potentially create a master data problem, the opportunity should be explored with caution
+
+\subsubsection{Threats}
+The key threat to the pattern is a sudden spike of either subscriber numbers or change events. Unless the worker component is implemented with scalability in mind, and proper operational measures are in place to detect such a situation, event delivery could act up in unpredictable ways. Also, the pattern is prone to rapid increase in operational complexity should complex retry mechanisms be put in place for subscribers.
+
+\subsection{Operational considerations}
+The key operational consideration for the pattern is queue and worker state monitoring in accordance with the failure mode(s) implemented. For example, in case the worker will simply drop undeliverable messages do subscribers, this should be clearly logged. And when the worker will use a queue-based approach for pushing out messages, the size of that queue should be monitored. 
 
 \clearpage
 \begin{appendices}
@@ -509,7 +567,7 @@ This brief overview can not hope to encompass all the complexity related to X-Ro
 
 \bibliographystyle{plain}
 \bibliography{xroad_distilled} 
-\addcontentsline{toc}{section}{Index}
-\printindex
+%\addcontentsline{toc}{section}{Index}
+%\printindex
 
 \end{document}
