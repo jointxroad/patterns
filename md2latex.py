@@ -11,6 +11,7 @@ STATE_DEFAULT = 0
 STATE_LIST = 1
 STATE_DESCRIPTION = 2
 STATE_REPEAT = 3
+STATE_ENUMLIST = 4
 
 # Functions for translating between MD and LaTeX. Each gets the match object and the current state as input
 # And returns the new state
@@ -24,6 +25,23 @@ def subsection(r, state):
 
 def subsubsection(r, state):
 	return (state, "\\subsubsection{%s}" % (r.group(1)))
+
+
+
+
+def enumerate(r, state):
+	s = state
+	o = ""
+
+# If we are in a default state, start the list 
+	if s == STATE_DEFAULT:
+		o = "\\begin{enumerate}\n"
+		s = STATE_ENUMLIST
+
+	o = o + "\t\\item %s" % (r.group(1))
+
+	return (s, o)
+
 
 def itemize(r, state):
 	s = state
@@ -56,6 +74,12 @@ def ref(r, state):
 # patterns after this. Thus, return STATE_REPEAT
 	return (STATE_REPEAT, r.group(1) + r.group(2) + " \\ref{%s}" % r.group(3) + r.group(4)) 
 
+def label(r, state):
+	return (STATE_REPEAT, "\\label{%s}\n" % r.group(1))
+
+def code(r, state):
+	return (STATE_REPEAT, "%s\\texttt{%s}%s" % (r.group(1), r.group(2), r.group(3)))
+
 def image(r, state):
 	label = r.group(1)
 	caption = r.group(2)
@@ -81,6 +105,10 @@ def default(r, state):
 		o = "\\end{description}\n"
 		s = STATE_DEFAULT
 
+	if s == STATE_ENUMLIST:
+		o = "\\end{enumerate}\n"
+		s = STATE_DEFAULT
+
 	o = o +  r.group(1)
 	return (s, o)
 
@@ -88,11 +116,14 @@ def default(r, state):
 # but we want the specific order of the regexps so array it is 
 patterns = [
 		{'r':'(.*)\[(\w*)\]\(\#(\w*)\)(.*)', 'f':ref},
+		{'r':'<a\sname\=\"(.*)\"></a>[^!]', 'f':label},
+		{'r':'(.*)\`(.*)\`(.*)', 'f':code},
 		{'r':'^\#\s(.*)', 'f':section},
 		{'r':'^\#\#\s(.*)', 'f':subsection},
 		{'r':'^\#\#\#\s(.*)', 'f':subsubsection},
 		{'r':'^\s\*\s\*\*([\w\s]*)\*\*(.*)', 'f':description},
 		{'r':'^\s\*\s(.*)', 'f':itemize},
+		{'r':'^\s1.\s(.*)', 'f':enumerate},
 		{'r':'<a\sname\=\"(.*)\"></a>!\[(.*)\]\((.*)\)', 'f':image},
 		{'r':'(.*)', 'f':default}
 
