@@ -104,6 +104,7 @@ patterns = [
 #----------
 state = STATE_DEFAULT
 
+print "% Pattern boundary "
 # Iterate over the lines from stdin
 for l in fileinput.input():
 	o = l
