@@ -143,13 +143,15 @@ for l in fileinput.input():
 	for p in patterns:
 		m = re.match(p['r'], o)
 		if m:
+			# record the previous state so we don't loose it 
+			p_state = state
 			(state, o) = p['f'](m, state)
 			# Should we continue with the rest of the regexps or not?
 			if state != STATE_REPEAT:
 				print o
 				break
 			else:
-				state = STATE_DEFAULT
+				state = p_state
 
 
 
