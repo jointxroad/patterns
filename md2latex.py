@@ -74,6 +74,10 @@ def ref(r, state):
 # patterns after this. Thus, return STATE_REPEAT
 	return (STATE_REPEAT, r.group(1) + r.group(2) + " \\ref{%s}" % r.group(3) + r.group(4)) 
 
+def secref(r, state):
+# This is like ref but for links to sections
+	return (STATE_REPEAT, r.group(1) + r.group(2) + " \\ref{section:%s}" % r.group(3) + r.group(4)) 
+
 def label(r, state):
 	return (STATE_REPEAT, "\\label{%s}\n" % r.group(1))
 
@@ -116,15 +120,16 @@ def default(r, state):
 # but we want the specific order of the regexps so array it is 
 patterns = [
 		{'r':'(.*)\[([\w\s]*)\]\(\#(\w*)\)(.*)', 'f':ref},
+		{'r':'(.*)\[([\w\s]*)\]\((\d*)\)(.*)', 'f':secref},
 		{'r':'<a\sname\=\"(.*)\"></a>[^!]', 'f':label},
-		{'r':'(.*)\`(.*)\`(.*)', 'f':code},
+		{'r':'(.*)\`\`(.*)\`\`(.*)', 'f':code},
 		{'r':'^\#\s(.*)', 'f':section},
 		{'r':'^\#\#\s(.*)', 'f':subsection},
 		{'r':'^\#\#\#\s(.*)', 'f':subsubsection},
 		{'r':'^\s\*\s\*\*([\w\s]*)\*\*(.*)', 'f':description},
 		{'r':'^\s\*\s(.*)', 'f':itemize},
 		{'r':'^\s1.\s(.*)', 'f':enumerate},
-		{'r':'<a\sname\=\"(.*)\"></a>!\[(.*)\]\(\/(.*)\)', 'f':image},
+		{'r':'<a\sname\=\"(.*)\"></a>!\[(.*)\]\((.*)\)', 'f':image},
 		{'r':'(.*)', 'f':default}
 
 	]
