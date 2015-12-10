@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+  {% include head.html %}
+
+  <body>
+
+
+
+
+
+    <div class="page-content">
+      <div class="wrapper">
+    {% include header.html %}
+    <div id="pagelist" style="display:table-cell;float:left;width:200px">
+<nav class="site-nav">
+	<ul>
+        {% for my_page in site.pages %}
+          {% if my_page.title %}
+	  <li><a class="page-link" href="{{ my_page.url | prepend: site.baseurl }}">{{ my_page.title }}</a></li>
+          {% endif %}
+        {% endfor %}
+</ul>
+</nav>
+
+		</div>
+		<div id="other" style="display:table-cell;float:left;width:500px;margin-top:20px">
+        {{ content }}
+		</div>
+      </div>
+    </div>
+
+    {% include footer.html %}
+
+  </body>
+
+</html>

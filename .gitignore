@@ -127,3 +127,8 @@ sympy-plots-for-*.tex/
 
 # vim temp
 *~
+
+# Jekyll stuff
+_site
+.sass-cache
+.jekyll-metadata
