@@ -115,7 +115,7 @@ def default(r, state):
 # Yes, a dict would be nicer as this is only key-value pairs
 # but we want the specific order of the regexps so array it is 
 patterns = [
-		{'r':'(.*)\[(\w*)\]\(\#(\w*)\)(.*)', 'f':ref},
+		{'r':'(.*)\[([\w\s]*)\]\(\#(\w*)\)(.*)', 'f':ref},
 		{'r':'<a\sname\=\"(.*)\"></a>[^!]', 'f':label},
 		{'r':'(.*)\`(.*)\`(.*)', 'f':code},
 		{'r':'^\#\s(.*)', 'f':section},
@@ -124,7 +124,7 @@ patterns = [
 		{'r':'^\s\*\s\*\*([\w\s]*)\*\*(.*)', 'f':description},
 		{'r':'^\s\*\s(.*)', 'f':itemize},
 		{'r':'^\s1.\s(.*)', 'f':enumerate},
-		{'r':'<a\sname\=\"(.*)\"></a>!\[(.*)\]\((.*)\)', 'f':image},
+		{'r':'<a\sname\=\"(.*)\"></a>!\[(.*)\]\(\/(.*)\)', 'f':image},
 		{'r':'(.*)', 'f':default}
 
 	]
