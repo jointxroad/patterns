@@ -1,11 +1,12 @@
-# patterns
+# Patterns
 Technical patterns for integrating organisations using x-road
 
-This is a collection of graphics and XeLaTeX that results in a document describing ways organisations can talk to each other using x-road or other secure communications channel. 
+For most users, it would make sense to  head over to http://jointxroad.github.io/patterns/
 
-For most users, one should get a PDF version from the release and report any issues or shortcomings as issues.
+For running a local copy, clone the repo and serve it using jekyll
 
-For the ones desiring to compile the PDF themselves, it is recommended to get a TeXLive installation from https://www.tug.org/texlive/. The document should fully complile using the standard installation with the following workflow:
+Should you be adventurous and would love a PDF output, it is recommended to get a TeXLive installation from https://www.tug.org/texlive/. Main.tex should fully complile using the standard installation with the following workflow:
+* Run the convert.sh script that converts the md files to LaTeX
 * XeLaTeX
 * BibTex
 * MakeIndex
