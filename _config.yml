@@ -12,8 +12,8 @@ description: > # this means to ignore newlines until "baseurl:"
         This collection of patterns embodies a set of best practices organisations can use 
         talking to each other. The patterns refer to X-Road a lot,
         but they can happily be used without it 
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site
+baseurl: "/patterns" # the subpath of your site, e.g. /blog
+url: "http://jointxroad.github.io" # the base hostname & protocol for your site
 #twitter_username: jekyllrb
 #github_username:  jekyll
 
